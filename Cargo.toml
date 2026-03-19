@@ -1,6 +1,6 @@
 [package]
 name = "modelcli"
-version = "0.0.1"
+version = "0.0.0"
 edition = "2024"
 description = "Call any LLM from the command line via models.dev"
 repository = "https://github.com/Blankeos/modelcli"
