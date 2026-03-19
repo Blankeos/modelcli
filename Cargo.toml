@@ -1,7 +1,10 @@
 [package]
 name = "modelcli"
-version = "0.1.0"
+version = "0.0.0"
 edition = "2024"
+description = "Call any LLM from the command line via models.dev"
+repository = "https://github.com/Blankeos/modelcli"
+license = "MIT"
 
 [dependencies]
 rig-core = { version = "0.33", features = ["all"] }
@@ -18,3 +21,8 @@ futures = "0.3"
 colored = "2"
 anyhow = "1"
 json_comments = "0.2"
+
+# The profile that 'dist' will build with
+[profile.dist]
+inherits = "release"
+lto = "thin"

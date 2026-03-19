@@ -1,0 +1,40 @@
+{
+	"name": "modelcli",
+	"version": "0.0.0",
+	"description": "Call any LLM from the command line via models.dev",
+	"main": "bin.js",
+	"bin": {
+		"modelcli": "./bin.js"
+	},
+	"scripts": {
+		"postinstall": "node install.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Blankeos/modelcli.git"
+	},
+	"keywords": [
+		"cli",
+		"llm",
+		"ai",
+		"models.dev",
+		"anthropic",
+		"openai",
+		"terminal"
+	],
+	"author": "Carlo",
+	"license": "MIT",
+	"files": [
+		"install.js",
+		"bin.js",
+		"README.md"
+	],
+	"engines": {
+		"node": ">=12"
+	},
+	"os": [
+		"darwin",
+		"linux",
+		"win32"
+	]
+}
