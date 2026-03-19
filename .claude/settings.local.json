@@ -23,7 +23,11 @@
       "Bash(curl -s \"https://raw.githubusercontent.com/0xPlaygrounds/rig/main/rig/rig-core/src/providers/openai/completion/mod.rs\" -H \"User-Agent: modelcli-research/1.0\")",
       "Bash(curl -s \"https://raw.githubusercontent.com/0xPlaygrounds/rig/main/rig/rig-core/src/client.rs\" -H \"User-Agent: modelcli-research/1.0\")",
       "Bash(curl -s \"https://raw.githubusercontent.com/0xPlaygrounds/rig/main/rig/rig-core/src/completion.rs\" -H \"User-Agent: modelcli-research/1.0\")",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "WebSearch",
+      "WebFetch(domain:docs.rig.rs)",
+      "WebFetch(domain:www.blog.brightcoding.dev)",
+      "WebFetch(domain:models.dev)"
     ]
   }
 }
