@@ -1,6 +1,6 @@
 {
 	"name": "modelcli",
-	"version": "0.0.0",
+	"version": "0.0.1",
 	"description": "Call any LLM from the command line via models.dev",
 	"main": "bin.js",
 	"bin": {
