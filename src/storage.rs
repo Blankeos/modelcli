@@ -1,4 +1,4 @@
-use anyhow::{Context, Result};
+use anyhow::{Context, Result, bail};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -8,6 +8,11 @@ fn data_dir() -> Result<PathBuf> {
     let dir = home.join(".local").join("share").join("modelcli");
     std::fs::create_dir_all(&dir)?;
     Ok(dir)
+}
+
+fn custom_config_dir() -> Result<PathBuf> {
+    let home = dirs::home_dir().context("Could not determine home directory")?;
+    Ok(home.join(".config"))
 }
 
 // ── Auth (API keys per provider) ──
@@ -115,6 +120,108 @@ impl CachedModelsData {
         };
         let json = serde_json::to_string(&cached)?;
         std::fs::write(&path, json)?;
+        Ok(())
+    }
+}
+
+// ── Custom provider config (~/.config/modelcli/config.jsonc) ──
+
+#[derive(Debug, Default, Serialize, Deserialize)]
+pub struct CustomConfig {
+    #[serde(default)]
+    pub provider: HashMap<String, CustomProvider>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CustomProvider {
+    pub name: String,
+    #[serde(rename = "baseURL")]
+    pub base_url: String,
+    #[serde(default)]
+    pub models: HashMap<String, CustomModel>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CustomModel {
+    pub name: Option<String>,
+    #[serde(default)]
+    pub reasoning: bool,
+    pub context: Option<u64>,
+    pub output: Option<u64>,
+}
+
+impl CustomConfig {
+    /// Load custom config from ~/.config/modelcli/config.jsonc (or .json).
+    /// Errors if both files exist. Returns default if neither exists.
+    pub fn load() -> Result<Self> {
+        let dir = custom_config_dir()?;
+        let jsonc_path = dir.join("modelcli.jsonc");
+        let json_path = dir.join("modelcli.json");
+        let jsonc_exists = jsonc_path.exists();
+        let json_exists = json_path.exists();
+
+        if jsonc_exists && json_exists {
+            bail!(
+                "Found both ~/.config/modelcli.jsonc and ~/.config/modelcli.json. Please keep only one."
+            );
+        }
+
+        let path = if jsonc_exists {
+            jsonc_path
+        } else if json_exists {
+            json_path
+        } else {
+            return Ok(Self::default());
+        };
+
+        let raw = std::fs::read_to_string(&path)
+            .with_context(|| format!("Failed to read {}", path.display()))?;
+
+        // Strip JSONC comments before parsing
+        let stripped = json_comments::StripComments::new(raw.as_bytes());
+        let config: CustomConfig = serde_json::from_reader(stripped)
+            .with_context(|| format!("Failed to parse {}", path.display()))?;
+
+        Ok(config)
+    }
+
+    /// Returns the path to the config file (prefers .jsonc).
+    pub fn config_path() -> Result<PathBuf> {
+        let dir = custom_config_dir()?;
+        Ok(dir.join("modelcli.jsonc"))
+    }
+
+    /// Auto-scaffold ~/.config/modelcli.jsonc with a template for the given provider ID.
+    pub fn scaffold(provider_id: &str) -> Result<()> {
+        let dir = custom_config_dir()?;
+        let path = dir.join("modelcli.jsonc");
+
+        if path.exists() {
+            return Ok(());
+        }
+
+        std::fs::create_dir_all(&dir)?;
+
+        let template = format!(
+            r#"{{
+  "provider": {{
+    // "{provider_id}": {{
+    //   "name": "My Provider Display Name",
+    //   "baseURL": "https://api.example.com/v1",
+    //   "models": {{
+    //     "model-id": {{
+    //       "name": "Model Display Name",
+    //       "reasoning": false,
+    //       "context": 200000,
+    //       "output": 65536
+    //     }}
+    //   }}
+    // }}
+  }}
+}}"#
+        );
+
+        std::fs::write(&path, template)?;
         Ok(())
     }
 }

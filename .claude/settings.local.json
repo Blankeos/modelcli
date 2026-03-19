@@ -27,7 +27,8 @@
       "WebSearch",
       "WebFetch(domain:docs.rig.rs)",
       "WebFetch(domain:www.blog.brightcoding.dev)",
-      "WebFetch(domain:models.dev)"
+      "WebFetch(domain:models.dev)",
+      "Bash(cargo build:*)"
     ]
   }
 }

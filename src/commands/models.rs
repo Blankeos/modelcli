@@ -1,8 +1,8 @@
 use anyhow::{Result, bail};
 use inquire::Select;
 
-use crate::api::models_dev;
-use crate::storage::{AuthStore, Config};
+use crate::api::models_dev::{self, provider_from_custom};
+use crate::storage::{AuthStore, Config, CustomConfig};
 
 pub async fn run() -> Result<()> {
     let auth = AuthStore::load()?;
@@ -11,7 +11,15 @@ pub async fn run() -> Result<()> {
         bail!("No providers connected. Run `modelcli connect` first.");
     }
 
-    let all_providers = models_dev::fetch_providers().await?;
+    let mut all_providers = models_dev::fetch_providers().await?;
+
+    // Merge custom providers
+    let custom_config = CustomConfig::load()?;
+    for (id, custom) in &custom_config.provider {
+        if !all_providers.contains_key(id) {
+            all_providers.insert(id.clone(), provider_from_custom(id, custom));
+        }
+    }
 
     // Collect models from connected providers only
     let mut model_entries: Vec<(String, String, String)> = Vec::new(); // (display, provider/model, provider_id)
@@ -20,6 +28,19 @@ pub async fn run() -> Result<()> {
 
     for provider_id in &connected {
         if let Some(provider) = all_providers.get(provider_id) {
+            if provider.models.is_empty() {
+                // Custom provider with no models configured yet
+                if custom_config.provider.contains_key(provider_id) {
+                    let config_path = CustomConfig::config_path()?;
+                    eprintln!(
+                        "Note: No models configured for '{}'. Add models to {}",
+                        provider_id,
+                        config_path.display()
+                    );
+                }
+                continue;
+            }
+
             let mut text_models: Vec<_> = provider.text_models();
             text_models.sort_by(|(_, a), (_, b)| a.name.cmp(&b.name));
 

@@ -175,3 +175,47 @@ pub fn text_providers(providers: &ProvidersMap) -> ProvidersMap {
         .map(|(k, v)| (k.clone(), v.clone()))
         .collect()
 }
+
+/// Convert a CustomProvider into a models_dev Provider for uniform handling.
+pub fn provider_from_custom(
+    id: &str,
+    custom: &crate::storage::CustomProvider,
+) -> Provider {
+    let models: HashMap<String, Model> = custom
+        .models
+        .iter()
+        .map(|(model_id, cm)| {
+            let model = Model {
+                id: model_id.clone(),
+                name: cm.name.clone().unwrap_or_else(|| model_id.clone()),
+                reasoning: cm.reasoning,
+                interleaved: None,
+                temperature: None,
+                modalities: Some(Modalities {
+                    input: vec!["text".to_string()],
+                    output: vec!["text".to_string()],
+                }),
+                status: None,
+                tool_call: false,
+                structured_output: false,
+                cost: None,
+                limit: match (cm.context, cm.output) {
+                    (None, None) => None,
+                    _ => Some(Limits {
+                        context: cm.context,
+                        output: cm.output,
+                    }),
+                },
+            };
+            (model_id.clone(), model)
+        })
+        .collect();
+
+    Provider {
+        id: id.to_string(),
+        name: custom.name.clone(),
+        env: vec![],
+        api: Some(custom.base_url.clone()),
+        models,
+    }
+}

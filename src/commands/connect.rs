@@ -1,8 +1,8 @@
 use anyhow::{Result, bail};
-use inquire::{Confirm, Password, Select};
+use inquire::{Confirm, Password, Select, Text};
 
 use crate::api::models_dev::{self, text_providers, sorted_provider_ids};
-use crate::storage::AuthStore;
+use crate::storage::{AuthStore, CustomConfig};
 
 pub async fn run() -> Result<()> {
     let providers = models_dev::fetch_providers().await?;
@@ -42,7 +42,9 @@ pub async fn run() -> Result<()> {
 
     // Add provider flow
     let sorted_ids = sorted_provider_ids(&providers);
-    let display_names: Vec<String> = sorted_ids
+    let other_label = "Other (custom provider)".to_string();
+
+    let mut display_names: Vec<String> = sorted_ids
         .iter()
         .map(|id| {
             let p = &providers[id];
@@ -50,6 +52,7 @@ pub async fn run() -> Result<()> {
             format!("{}{connected}", p.name)
         })
         .collect();
+    display_names.push(other_label.clone());
 
     let selection = Select::new("Select a provider:", display_names.clone())
         .with_page_size(15)
@@ -63,12 +66,18 @@ pub async fn run() -> Result<()> {
         }
     };
 
+    // "Other" is the last item
+    if display_names[selected_idx] == other_label {
+        return custom_provider_flow(&mut auth, &providers).await;
+    }
+
     let provider_id = &sorted_ids[selected_idx];
     let provider = &providers[provider_id];
 
     let env_hint = provider.env.first().map(|e| e.as_str()).unwrap_or("API_KEY");
 
     let api_key = Password::new(&format!("Enter API key for {} ({env_hint}):", provider.name))
+        .with_display_mode(inquire::PasswordDisplayMode::Masked)
         .without_confirmation()
         .prompt();
 
@@ -81,6 +90,89 @@ pub async fn run() -> Result<()> {
             auth.set(provider_id, key.trim());
             auth.save()?;
             eprintln!("✓ Connected to {}.", provider.name);
+        }
+        Err(_) => {
+            eprintln!("Cancelled.");
+        }
+    }
+
+    Ok(())
+}
+
+async fn custom_provider_flow(
+    auth: &mut AuthStore,
+    known_providers: &models_dev::ProvidersMap,
+) -> Result<()> {
+    // Prompt for provider ID
+    let provider_id = Text::new("Enter a unique provider ID (e.g. \"myprovider\"):")
+        .prompt();
+
+    let provider_id = match provider_id {
+        Ok(id) => id.trim().to_string(),
+        Err(_) => {
+            eprintln!("Cancelled.");
+            return Ok(());
+        }
+    };
+
+    if provider_id.is_empty() {
+        eprintln!("Provider ID cannot be empty.");
+        return Ok(());
+    }
+
+    // Validate: alphanumeric + hyphens only
+    let valid = provider_id
+        .chars()
+        .all(|c| c.is_ascii_alphanumeric() || c == '-');
+    if !valid {
+        eprintln!("Provider ID must be alphanumeric and hyphens only.");
+        return Ok(());
+    }
+
+    // Must not collide with a known models.dev provider
+    if known_providers.contains_key(&provider_id) {
+        eprintln!(
+            "Provider ID '{}' is already a known provider. Choose a different ID.",
+            provider_id
+        );
+        return Ok(());
+    }
+
+    let config_path = CustomConfig::config_path()?;
+    let config_display = config_path.display();
+
+    eprintln!();
+    eprintln!("Note: This only stores a credential for \"{}\".", provider_id);
+    eprintln!(
+        "You'll need to configure it in {}",
+        config_display
+    );
+    eprintln!("(see docs for format).");
+    eprintln!();
+
+    // Prompt for API key
+    let api_key = Password::new(&format!("Enter API key for \"{}\":", provider_id))
+        .with_display_mode(inquire::PasswordDisplayMode::Masked)
+        .without_confirmation()
+        .prompt();
+
+    match api_key {
+        Ok(key) => {
+            if key.trim().is_empty() {
+                eprintln!("API key cannot be empty.");
+                return Ok(());
+            }
+            auth.set(&provider_id, key.trim());
+            auth.save()?;
+            eprintln!("✓ Credential saved for \"{}\".", provider_id);
+
+            // Auto-scaffold config.jsonc if it doesn't exist
+            CustomConfig::scaffold(&provider_id)?;
+
+            eprintln!(
+                "✓ Next step: add provider config to {}",
+                config_display
+            );
         }
         Err(_) => {
             eprintln!("Cancelled.");
