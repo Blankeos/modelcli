@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s https://models.dev/api.json)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:docs.rs)",
+      "WebFetch(domain:rig.rs)",
+      "WebFetch(domain:crates.io)",
+      "Bash(curl -s \"https://crates.io/api/v1/crates/rig-core\" -H \"User-Agent: modelcli-research/1.0\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); c=d[''''crate'''']; v=d[''''versions''''][0]; print\\(f''''name: {c[\"\"name\"\"]}\\\\nnewest_version: {c[\"\"newest_version\"\"]}\\\\ndownloads: {c[\"\"downloads\"\"]}\\\\nrecent_downloads: {c[\"\"recent_downloads\"\"]}\\\\nlatest_version_downloads: {v[\"\"downloads\"\"]}\\\\nupdated_at: {c[\"\"updated_at\"\"]}\\\\ncreated_at: {c[\"\"created_at\"\"]}''''\\)\")",
+      "Bash(curl -s \"https://crates.io/api/v1/crates/aisdk\" -H \"User-Agent: modelcli-research/1.0\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); c=d[''''crate'''']; v=d[''''versions''''][0]; print\\(f''''name: {c[\"\"name\"\"]}\\\\nnewest_version: {c[\"\"newest_version\"\"]}\\\\ndownloads: {c[\"\"downloads\"\"]}\\\\nrecent_downloads: {c[\"\"recent_downloads\"\"]}\\\\nupdated_at: {c[\"\"updated_at\"\"]}\\\\ncreated_at: {c[\"\"created_at\"\"]}''''\\)\")",
+      "Bash(curl -s \"https://api.github.com/repos/0xPlaygrounds/rig\" -H \"User-Agent: modelcli-research/1.0\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(f''''stars: {d[\"\"stargazers_count\"\"]}\\\\nforks: {d[\"\"forks_count\"\"]}\\\\nopen_issues: {d[\"\"open_issues_count\"\"]}\\\\npushed_at: {d[\"\"pushed_at\"\"]}\\\\ndescription: {d[\"\"description\"\"]}''''\\)\")",
+      "Bash(curl -s \"https://api.github.com/repos/lazy-hq/aisdk\" -H \"User-Agent: modelcli-research/1.0\")",
+      "Bash(curl -s \"https://api.github.com/repos/0xPlaygrounds/rig/contents/rig-core/src/providers\" -H \"User-Agent: modelcli-research/1.0\")",
+      "Bash(python3 -c \"import json,sys; items=json.load\\(sys.stdin\\); [print\\(i[''''name'''']\\) for i in items]\")",
+      "Bash(curl -s \"https://raw.githubusercontent.com/0xPlaygrounds/rig/main/rig-core/src/providers/openai.rs\" -H \"User-Agent: modelcli-research/1.0\")",
+      "Bash(curl -s \"https://api.github.com/repos/0xPlaygrounds/rig/git/trees/main?recursive=1\" -H \"User-Agent: modelcli-research/1.0\")",
+      "Bash(python3 -c \":*)",
+      "Bash(curl -s \"https://raw.githubusercontent.com/0xPlaygrounds/rig/main/rig/rig-core/src/providers/openai/client.rs\" -H \"User-Agent: modelcli-research/1.0\")",
+      "Bash(curl -s \"https://raw.githubusercontent.com/0xPlaygrounds/rig/main/rig/rig-core/src/providers/openai/completion/mod.rs\" -H \"User-Agent: modelcli-research/1.0\")",
+      "Bash(curl -s \"https://raw.githubusercontent.com/0xPlaygrounds/rig/main/rig/rig-core/src/client.rs\" -H \"User-Agent: modelcli-research/1.0\")",
+      "Bash(curl -s \"https://raw.githubusercontent.com/0xPlaygrounds/rig/main/rig/rig-core/src/completion.rs\" -H \"User-Agent: modelcli-research/1.0\")",
+      "Bash(curl:*)"
+    ]
+  }
+}
