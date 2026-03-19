@@ -128,7 +128,8 @@ jobs:
       - uses: swatinem/rust-cache@v2
       - name: Install cargo-binstall
         shell: bash
-        run: curl --proto '=https' --tlsv1.2 -LsSf https://github.com/cargo-rs/cargo-binstall/releases/latest/download/cargo-binstall-x86_64-unknown-linux-gnu.tgz | tar zxf - -C ~/.cargo/bin
+        run: |
+          curl --proto '=https' --tlsv1.2 -LsSf https://github.com/cargo-bins/cargo-binstall/releases/download/v1.17.7/cargo-binstall-x86_64-unknown-linux-gnu.tgz | tar zxf - -C ~/.cargo/bin
       - name: Build artifacts
         shell: bash
         run: |
