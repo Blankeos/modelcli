@@ -22,7 +22,7 @@
 		"openai",
 		"terminal"
 	],
-	"author": "Carlo",
+	"author": "Blankeos",
 	"license": "MIT",
 	"files": [
 		"install.js",
