@@ -16,7 +16,7 @@ Call any LLM from the command line via [models.dev](https://models.dev).
 ```sh
 npm install -g @blankeos/modelcli # npm
 bun install -g @blankeos/modelcli # or bun
-cargo install --path . # or cargo
+cargo install modelcli            # or cargo
 ```
 
 ## Quick Start

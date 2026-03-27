@@ -17,6 +17,8 @@ pub struct Provider {
     pub env: Vec<String>,
     /// OpenAI-compatible base URL (if present)
     pub api: Option<String>,
+    /// npm package name (e.g. "@ai-sdk/google"), used to select the native rig client
+    pub npm: Option<String>,
     #[serde(default)]
     pub models: HashMap<String, Model>,
 }
@@ -216,6 +218,7 @@ pub fn provider_from_custom(
         name: custom.name.clone(),
         env: vec![],
         api: Some(custom.base_url.clone()),
+        npm: None,
         models,
     }
 }
