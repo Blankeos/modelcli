@@ -1,6 +1,6 @@
 {
 	"name": "@blankeos/modelcli",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"private": false,
 	"description": "Call any LLM from the command line via models.dev",
 	"main": "bin.js",
