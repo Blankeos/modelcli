@@ -76,20 +76,39 @@ pub async fn run() -> Result<()> {
 
     let env_hint = provider.env.first().map(|e| e.as_str()).unwrap_or("API_KEY");
 
-    let api_key = Password::new(&format!("Enter API key for {} ({env_hint}):", provider.name))
+    // Check if provider has any free models (all cost fields are 0)
+    let has_free_models = provider.models.values().any(|m| {
+        m.cost.as_ref().is_some_and(|c| c.input == Some(0.0) && c.output == Some(0.0))
+    });
+
+    let key_prompt = if has_free_models {
+        format!(
+            "Enter API key for {} ({env_hint}) — press Enter to skip for free models:",
+            provider.name
+        )
+    } else {
+        format!("Enter API key for {} ({env_hint}):", provider.name)
+    };
+
+    let api_key = Password::new(&key_prompt)
         .with_display_mode(inquire::PasswordDisplayMode::Masked)
         .without_confirmation()
         .prompt();
 
     match api_key {
         Ok(key) => {
-            if key.trim().is_empty() {
+            let key = key.trim();
+            if key.is_empty() && !has_free_models {
                 eprintln!("API key cannot be empty.");
                 return Ok(());
             }
-            auth.set(provider_id, key.trim());
+            auth.set(provider_id, key);
             auth.save()?;
-            eprintln!("✓ Connected to {}.", provider.name);
+            if key.is_empty() {
+                eprintln!("✓ Connected to {} (free models only).", provider.name);
+            } else {
+                eprintln!("✓ Connected to {}.", provider.name);
+            }
         }
         Err(_) => {
             eprintln!("Cancelled.");
@@ -151,18 +170,18 @@ async fn custom_provider_flow(
     eprintln!();
 
     // Prompt for API key
-    let api_key = Password::new(&format!("Enter API key for \"{}\":", provider_id))
+    let api_key = Password::new(&format!(
+        "Enter API key for \"{}\" — press Enter to skip if not needed:",
+        provider_id
+    ))
         .with_display_mode(inquire::PasswordDisplayMode::Masked)
         .without_confirmation()
         .prompt();
 
     match api_key {
         Ok(key) => {
-            if key.trim().is_empty() {
-                eprintln!("API key cannot be empty.");
-                return Ok(());
-            }
-            auth.set(&provider_id, key.trim());
+            let key = key.trim();
+            auth.set(&provider_id, key);
             auth.save()?;
             eprintln!("✓ Credential saved for \"{}\".", provider_id);
 

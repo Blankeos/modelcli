@@ -32,7 +32,7 @@ pub async fn run(
             model_str
         ))?;
 
-    // Load auth
+    // Load auth — empty string means "no key" (free-tier / public endpoint)
     let auth = AuthStore::load()?;
     let api_key = auth
         .get(provider_id)
