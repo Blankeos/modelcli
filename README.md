@@ -11,6 +11,10 @@
 
 Call any LLM from the command line via [models.dev](https://models.dev).
 
+- **API-key based models** — works with any provider that uses standard API keys (OpenAI, Anthropic, Google, xAI, Groq, Mistral, etc.)
+- **Some subscription models work** — as long as they use an API Key (Z.AI's GLM, Minimax, etc.)
+- **No OAuth subscription models** — does not support models behind OAuth login (e.g. ChatGPT Plus/Pro, Codex subscriptions)
+
 ## Install
 
 ```sh
