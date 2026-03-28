@@ -18,9 +18,11 @@ Call any LLM from the command line via [models.dev](https://models.dev).
 ## Install
 
 ```sh
-npm install -g @blankeos/modelcli # npm
-bun install -g @blankeos/modelcli # or bun
-cargo install modelcli            # or cargo
+npm install -g @blankeos/modelcli  # npm
+bun install -g @blankeos/modelcli  # or bun
+cargo binstall modelcli  # or cargo-binstall (prebuilt binary, faster)
+cargo install modelcli   # or cargo (build from source)
+curl -sSL https://raw.githubusercontent.com/Blankeos/modelcli/main/install.sh | sh # or linux/macos (via curl)
 ```
 
 ## Quick Start
